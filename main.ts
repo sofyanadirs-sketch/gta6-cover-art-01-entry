@@ -3,7 +3,7 @@
 // kit's vendor/makefun-app.ts. Node 22 standard library only; no network.
 // Run: MAKEFUN_OUTPUT_DIR=out node main.ts   (defaults to /output)
 
-import { cpSync, mkdirSync, rmSync, writeFileSync } from 'node:fs';
+import { chmodSync, cpSync, lstatSync, mkdirSync, readdirSync, rmSync, writeFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { buildDossier } from './vendor/makefun-app.ts';
@@ -20,10 +20,47 @@ const DOSSIER_CAPS = {
   app_path_max_bytes: 1000,
 };
 
-/** Remove a directory tree when it exists, ignoring a missing one. */
+/**
+ * Make a tree owner-writable (files 0644, directories 0755), skipping
+ * symlinks. cpSync preserves the repo's modes, so a copied tree can be
+ * read-only, and a read-only directory cannot have its entries removed.
+ */
+function makeWritable(path: string): void {
+  const st = lstatSync(path);
+  if (st.isSymbolicLink()) return;
+  if (st.isDirectory()) {
+    chmodSync(path, 0o755);
+    for (const entry of readdirSync(path)) makeWritable(join(path, entry));
+  } else {
+    chmodSync(path, 0o644);
+  }
+}
+
+/** Remove one entry, retrying once after making it writable. */
+function removeEntry(path: string): void {
+  try {
+    rmSync(path, { recursive: true, force: true });
+  } catch (err) {
+    const code = (err as NodeJS.ErrnoException).code;
+    if (code !== 'EACCES' && code !== 'EPERM') throw err;
+    makeWritable(path);
+    rmSync(path, { recursive: true, force: true });
+  }
+}
+
+/**
+ * Empty a directory without removing the directory itself.
+ * The grader mounts the output directory at MAKEFUN_OUTPUT_DIR (a bind
+ * mount at /output), and a mount point cannot be removed (rmdir fails
+ * with EBUSY/EACCES), so rmSync'ing the directory itself always threw
+ * and main.ts exited 1. Clearing only the entries inside works on a
+ * mount point and on a plain directory alike.
+ */
 function cleanDir(dir: string): void {
-  rmSync(dir, { recursive: true, force: true });
   mkdirSync(dir, { recursive: true });
+  for (const entry of readdirSync(dir)) {
+    removeEntry(join(dir, entry));
+  }
 }
 
 /** Copy a directory tree from the repo into the output directory. */
