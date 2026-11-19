@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Cover Studio — GTA-style cover art maker</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header id="topbar">
+  <div id="brand">
+    <span id="brandMark">CS</span>
+    <div>
+      <h1 id="brandTitle">COVER STUDIO</h1>
+      <p id="brandTag">Turn your photo into GTA-style cover art. Free, offline, no uploads.</p>
+    </div>
+  </div>
+  <p id="topNote">Original fan-made poster tool — no Rockstar logos, artwork or fonts.</p>
+</header>
+
+<main id="studio">
+  <section id="previewPane" aria-label="Live preview">
+    <div id="canvasWrap">
+      <canvas id="previewCanvas" width="1080" height="1080"></canvas>
+    </div>
+    <p id="previewHint">Click a panel to select it, then drag the photo to move it. Scroll to zoom the selected panel.</p>
+    <div id="quickBar">
+      <button id="fillAllBtn" type="button">Fill all panels with this photo</button>
+      <button id="shuffleBtn" type="button">Shuffle crops</button>
+      <button id="resetBtn" type="button">Reset cover</button>
+    </div>
+  </section>
+
+  <aside id="controls" aria-label="Cover controls">
+    <section class="ctlGroup" id="layoutGroup">
+      <h2>1 · Layout</h2>
+      <div class="btnRow" id="layoutRow">
+        <button type="button" data-layout="triple" class="picked">3 panels</button>
+        <button type="button" data-layout="single">1 panel</button>
+      </div>
+    </section>
+
+    <section class="ctlGroup" id="gradeGroup">
+      <h2>2 · Colour grade</h2>
+      <div class="btnRow" id="gradeRow">
+        <button type="button" data-grade="sunset" class="picked">Sunset</button>
+        <button type="button" data-grade="neon">Neon</button>
+        <button type="button" data-grade="original">Original</button>
+      </div>
+    </section>
+
+    <section class="ctlGroup" id="sizeGroup">
+      <h2>3 · Export size</h2>
+      <div class="btnRow" id="sizeRow">
+        <button type="button" data-size="square" class="picked">1080 × 1080</button>
+        <button type="button" data-size="portrait">1080 × 1350</button>
+        <button type="button" data-size="landscape">1920 × 1080</button>
+      </div>
+    </section>
+
+    <section class="ctlGroup" id="captionGroup">
+      <h2>4 · Caption</h2>
+      <label for="titleInput">Main title</label>
+      <input id="titleInput" type="text" maxlength="24" value="NEON NIGHTS" autocomplete="off">
+      <label for="subtitleInput">Subtitle</label>
+      <input id="subtitleInput" type="text" maxlength="48" value="A COVER BY YOU" autocomplete="off">
+    </section>
+
+    <section class="ctlGroup" id="panelGroup">
+      <h2>5 · Photos &amp; crop</h2>
+      <div class="btnRow" id="panelRow">
+        <button type="button" data-panel="0" class="picked">Panel 1</button>
+        <button type="button" data-panel="1">Panel 2</button>
+        <button type="button" data-panel="2">Panel 3</button>
+      </div>
+      <p id="panelNote">Panel 1 is the big one. Panel 3 is hidden in 1-panel mode.</p>
+      <label class="fileBtn" for="photoInput">Upload a photo for this panel
+        <input id="photoInput" type="file" accept="image/*">
+      </label>
+      <label for="zoomSlider">Zoom <span id="zoomValue">100%</span></label>
+      <input id="zoomSlider" type="range" min="100" max="300" value="100">
+      <label for="offsetXSlider">Move left / right</label>
+      <input id="offsetXSlider" type="range" min="-100" max="100" value="0">
+      <label for="offsetYSlider">Move up / down</label>
+      <input id="offsetYSlider" type="range" min="-100" max="100" value="0">
+    </section>
+
+    <section class="ctlGroup" id="exportGroup">
+      <h2>6 · Export</h2>
+      <button id="exportBtn" type="button">Download PNG cover</button>
+      <p id="exportNote">Exports at the size picked above. Your photos never leave this browser.</p>
+      <p id="exportStatus" role="status"></p>
+    </section>
+  </aside>
+</main>
+
+<div id="coverMode" hidden>
+  <canvas id="coverCanvas"></canvas>
+</div>
+
+<script type="module" src="src/editor.js"></script>
+</body>
+</html>
